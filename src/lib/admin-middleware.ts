@@ -9,7 +9,7 @@ export async function verifyAdminRequest(request: NextRequest) {
   return !!adminPassword && providedPassword === adminPassword
 }
 
-export async function logAuditEvent() {
+export async function logAuditEvent(...args: any[]) {
   return null
 }
 
