@@ -108,13 +108,14 @@ export default function DraftBoardPage() {
     const roundNumber = Math.floor(picks.length / players.length) + 1
 
     const { error: pickError } = await supabase.from('draft_picks').insert({
-      league_id: 'default',
-      player_id: currentPlayer.id,
-      team_id: selectedTeam.id,
-      pick_number: currentPickNumber,
-      round: roundNumber,
-      round_number: roundNumber,
-    })
+  league_id: 'default',
+  player_id: currentPlayer.id,
+  team_id: selectedTeam.id,
+  pick_number: currentPickNumber,
+  position: currentPickNumber,
+  round: roundNumber,
+  round_number: roundNumber,
+})
 
     if (pickError) {
       setMessage(`Pick failed: ${pickError.message}`)
