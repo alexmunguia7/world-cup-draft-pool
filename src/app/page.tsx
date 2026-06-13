@@ -15,12 +15,10 @@ export default function HomePage() {
 
   const loadStatus = async () => {
     try {
-      // Get draft status
       const response = await fetch('/api/admin')
       const status = await response.json()
       setLeagueStatus(status)
 
-      // Get total pot
       const { data: settings } = await supabase
         .from('settings')
         .select('*')
@@ -48,7 +46,6 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-950 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-5xl font-bold mb-2">⚽ World Cup Draft Pool</h1>
@@ -59,7 +56,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Status Cards */}
         {leagueStatus && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
             <div className="card">
@@ -87,27 +83,16 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Main Navigation */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {/* Draft Board */}
-          <Link
-            href="/draft-board"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/draft-board" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">📋 Draft Board</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
             </div>
-            <p className="text-slate-400">
-              View the draft history and current draft progress
-            </p>
+            <p className="text-slate-400">View the draft history and current draft progress</p>
           </Link>
 
-          {/* Teams */}
-          <Link
-            href="/teams"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/teams" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">🌍 Teams</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
@@ -115,11 +100,7 @@ export default function HomePage() {
             <p className="text-slate-400">View all 48 World Cup teams and their status</p>
           </Link>
 
-          {/* Players */}
-          <Link
-            href="/players"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/players" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">👥 Players</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
@@ -127,11 +108,7 @@ export default function HomePage() {
             <p className="text-slate-400">View player rosters and standings</p>
           </Link>
 
-          {/* Leaderboard */}
-          <Link
-            href="/leaderboard"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/leaderboard" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">🏆 Leaderboard</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
@@ -139,11 +116,7 @@ export default function HomePage() {
             <p className="text-slate-400">Live standings and final rankings</p>
           </Link>
 
-          {/* Rules */}
-          <Link
-            href="/rules"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/rules" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">📖 Rules</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
@@ -151,11 +124,7 @@ export default function HomePage() {
             <p className="text-slate-400">Learn the scoring system and format</p>
           </Link>
 
-          {/* Payouts */}
-          <Link
-            href="/payouts"
-            className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group"
-          >
+          <Link href="/payouts" className="card hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer group">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">💰 Payouts</h2>
               <span className="text-3xl group-hover:scale-110 transition-transform">→</span>
@@ -164,21 +133,22 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Info Section */}
         <section className="card border-2 border-field-light">
           <h2 className="text-2xl font-bold mb-4">ℹ️ About This League</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-200">
             <div>
               <p className="font-bold mb-2">Snake Draft Format</p>
-              <p className="text-sm">6 players draft 8 teams each in a snake draft pattern for fairness</p>
+              <p className="text-sm">6 players draft 8 teams each in a snake draft pattern for fairness.</p>
             </div>
             <div>
               <p className="font-bold mb-2">Score on Performance</p>
-              <p className="text-sm">Teams earn points for group stage wins/draws and tournament advancement</p>
+              <p className="text-sm">
+                Group Stage: Win = 3 pts, Draw = 1 pt, Loss = 0 pts. Teams also earn points for advancing through the knockout rounds.
+              </p>
             </div>
             <div>
               <p className="font-bold mb-2">Winner Takes All</p>
-              <p className="text-sm">The player with the most points wins 100% of the total pot</p>
+              <p className="text-sm">The player with the most points wins 100% of the total pot.</p>
             </div>
           </div>
         </section>
