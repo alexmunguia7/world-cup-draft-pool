@@ -19,19 +19,9 @@ interface Team {
   drafted_by?: string
 }
 
-interface DraftStatus {
-  current_pick: number
-  current_round: number
-  current_player_order: number
-  draft_started: boolean
-  draft_completed: boolean
-  picks: any[]
-}
-
 export default function AdminPanel() {
   const [players, setPlayers] = useState<Player[]>([])
   const [teams, setTeams] = useState<Team[]>([])
-  const [draftStatus, setDraftStatus] = useState<DraftStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -43,18 +33,21 @@ export default function AdminPanel() {
     try {
       setLoading(true)
 
-      // Load players
-      const { data: playersData } = await supabase.from('players').select('*').order('order')
+      const { data: playersData, error: playersError } = await supabase
+        .from('players')
+        .select('*')
+        .order('order', { ascending: true })
+
+      if (playersError) throw playersError
+
+      const { data: teamsData, error: teamsError } = await supabase
+        .from('teams')
+        .select('*')
+
+      if (teamsError) throw teamsError
+
       setPlayers(playersData || [])
-
-      // Load teams
-      const { data: teamsData } = await supabase.from('teams').select('*')
       setTeams(teamsData || [])
-
-      // Load draft status
-      const response = await fetch('/api/draft/pick')
-      const status = await response.json()
-      setDraftStatus(status)
     } catch (err) {
       setError('Failed to load data')
       console.error(err)
@@ -65,7 +58,7 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-950 p-4">
+      <main className="min-h-screen bg-slate-950 p-4 text-white">
         <div className="text-center py-12">
           <p className="text-slate-400">Loading...</p>
         </div>
@@ -75,11 +68,14 @@ export default function AdminPanel() {
 
   const draftedCount = teams.filter((t) => t.status === 'drafted').length
   const availableCount = teams.filter((t) => t.status === 'available').length
+  const teamsPerPlayer =
+    players.length > 0 ? Math.floor(teams.length / players.length) : 0
+  const maxDraftPicks = teamsPerPlayer * players.length
+  const leftoverTeams = teams.length - maxDraftPicks
 
   return (
-    <main className="min-h-screen bg-slate-950 p-4">
+    <main className="min-h-screen bg-slate-950 p-4 text-white">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">⚙️ Admin Panel</h1>
           <div className="space-x-2">
@@ -98,29 +94,37 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="card">
             <p className="text-slate-400 text-sm">Draft Status</p>
-            <p className="text-2xl font-bold text-field-light">
-              {draftStatus?.draft_started ? 'In Progress' : 'Not Started'}
-            </p>
+            <p className="text-2xl font-bold text-field-light">Not Started</p>
           </div>
           <div className="card">
             <p className="text-slate-400 text-sm">Teams Drafted</p>
-            <p className="text-2xl font-bold">{draftedCount}/48</p>
+            <p className="text-2xl font-bold">{draftedCount}/{maxDraftPicks}</p>
           </div>
           <div className="card">
             <p className="text-slate-400 text-sm">Teams Available</p>
             <p className="text-2xl font-bold text-green-400">{availableCount}</p>
           </div>
           <div className="card">
-            <p className="text-slate-400 text-sm">Current Round</p>
-            <p className="text-2xl font-bold">{draftStatus?.current_round || 'N/A'}</p>
+            <p className="text-slate-400 text-sm">Teams Per Player</p>
+            <p className="text-2xl font-bold">{teamsPerPlayer}</p>
           </div>
         </div>
 
-        {/* Players Section */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Draft Format</h2>
+          <div className="card">
+            <p className="text-slate-300">
+              {players.length} players × {teamsPerPlayer} teams each = {maxDraftPicks} drafted teams.
+            </p>
+            <p className="text-slate-400 mt-2">
+              {leftoverTeams} teams will remain undrafted.
+            </p>
+          </div>
+        </section>
+
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Players</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -134,48 +138,12 @@ export default function AdminPanel() {
           </div>
         </section>
 
-        {/* Draft Board Section */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Draft Board</h2>
           <div className="card text-center py-12">
             <p className="text-slate-400 mb-4">Go to Draft Board page to manage draft</p>
             <Link href="/draft-board" className="btn-primary">
               Open Draft Board
-            </Link>
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link
-              href="/admin/players"
-              className="card hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <p className="font-bold">Edit Players</p>
-              <p className="text-slate-400 text-sm">Update player names and buy-ins</p>
-            </Link>
-            <Link
-              href="/admin/teams"
-              className="card hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <p className="font-bold">Edit Teams</p>
-              <p className="text-slate-400 text-sm">Update team names and flags</p>
-            </Link>
-            <Link
-              href="/admin/scoring"
-              className="card hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <p className="font-bold">Manual Scoring</p>
-              <p className="text-slate-400 text-sm">Record match results manually</p>
-            </Link>
-            <Link
-              href="/admin/audit"
-              className="card hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <p className="font-bold">Audit Log</p>
-              <p className="text-slate-400 text-sm">View all administrative changes</p>
             </Link>
           </div>
         </section>
