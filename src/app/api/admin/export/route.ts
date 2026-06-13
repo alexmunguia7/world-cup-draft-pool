@@ -1,22 +1,17 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { verifyAdminRequest, logAuditEvent, successResponse, unauthorizedResponse, errorResponse } from '@/lib/admin-middleware'
+import { verifyAdminRequest } from '@/lib/admin-middleware'
 
-/**
- * POST /api/admin/export
- * Export league data as JSON backup
- */
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin
     const isAdmin = await verifyAdminRequest(request)
+
     if (!isAdmin) {
-      return unauthorizedResponse()
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const leagueId = process.env.NEXT_PUBLIC_LEAGUE_ID || 'default'
 
-    // Get all data
     const [
       { data: players },
       { data: teams },
@@ -35,7 +30,7 @@ export async function POST(request: NextRequest) {
       supabaseAdmin.from('audit_log').select('*').eq('league_id', leagueId),
     ])
 
-    const backup = {
+    return NextResponse.json({
       league_id: leagueId,
       exported_at: new Date().toISOString(),
       version: '1.0',
@@ -46,22 +41,12 @@ export async function POST(request: NextRequest) {
       standings: standings || [],
       settings: settings || [],
       audit_log: auditLog || [],
-    }
-
-    // Log audit
-    await logAuditEvent(
-      supabaseAdmin,
-      'export_backup',
-      'league',
-      leagueId,
-      null,
-      null,
-      'League data exported'
-    )
-
-    return successResponse(backup)
+    })
   } catch (error) {
     console.error('Export error:', error)
-    return errorResponse('Failed to export league data')
+    return NextResponse.json(
+      { error: 'Failed to export league data' },
+      { status: 500 }
+    )
   }
 }
